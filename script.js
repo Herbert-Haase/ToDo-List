@@ -13,6 +13,9 @@ const input = (()=>{
         document.querySelector("#description").value = "";
         document.querySelector("#duedate").value = "";
         document.querySelector("#priority").value = "";
+        document.querySelector(".error").textContent = "";
+        document.querySelector(".save").removeAttribute("disabled");
+
     }
 
     function getInput(){
@@ -21,13 +24,22 @@ const input = (()=>{
         const duedate = document.querySelector("#duedate").value;
         const priority = document.querySelector("#priority").value;
 
-        cleanInput();
     
         return [title,description,duedate,priority];
     }
+
+    // function showERROR(){
+    //     const ERROR = document.querySelector(".error");
+    //     const save = document.querySelector(".save");
+
+    //     save.createAttribute("disabled");
+    //     ERROR.textContent = "Project with this title already exist";
+    // }
+
     return {
             cleanInput, 
-            getInput
+            getInput,
+            // showERROR
     }
 })()
 
@@ -35,15 +47,23 @@ const project = (()=>{
 
     const projectList = [];
 
+    function checkForDoubles(input){
+        return projectList.some((item)=>item.title === input[0]);
+    }
+
     function saveProject(){
         const projectData = input.getInput();
+
+        input.cleanInput();
     
         const project = new CreateProject(projectData[0],projectData[1],projectData[2],projectData[3]);
         projectList.push(project);
         console.log(projectList);
     }
 
-    return { saveProject }
+    return { saveProject,
+             checkForDoubles
+    }
 })()
 
 const save = document.querySelector(".save");
@@ -51,6 +71,20 @@ save.addEventListener("click",project.saveProject);
 
 const cancel = document.querySelector(".cancel");
 cancel.addEventListener("click",input.cleanInput);
+
+// const title = document.querySelector("#title");
+// title.addEventListener("blur",validateTitle);
+
+// function validateTitle(){
+//     if(project.checkForDoubles(this.value)){
+//         input.showERROR();
+//         return;
+//     }
+//     document.querySelector(".save").removeAttribute("disabled");
+// }
+
+
+
 
 const buildHtml = (TITLE, DESCRIPTION, DUEDATE, PRIORITY)=>{
     const row = document.createElement("div");
@@ -105,7 +139,7 @@ const buildHtml = (TITLE, DESCRIPTION, DUEDATE, PRIORITY)=>{
     content.insertBefore(row, createP)
 }
 
-buildHtml("TITLE", "DESCRIPTION", "DUEDATE", "PRIORITY");
+buildHtml("TITLE", "DESCRIPTION", "DUEDATE", "white");
 
 
 
