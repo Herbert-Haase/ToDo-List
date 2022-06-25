@@ -52,6 +52,62 @@ save.addEventListener("click",project.saveProject);
 const cancel = document.querySelector(".cancel");
 cancel.addEventListener("click",input.cleanInput);
 
+const buildHtml = (TITLE, DESCRIPTION, DUEDATE, PRIORITY)=>{
+    const row = document.createElement("div");
+    row.classList.add("row","g-1","mb-2");
+
+    const colCheckbox = document.createElement("div");
+    colCheckbox.classList.add("col-1","d-flex","justify-content-center");
+
+    const checkbox = document.createElement("input");
+    checkbox.setAttribute("type","checkbox");
+    checkbox.style.transform = "scale(1.5)";
+
+    const title = document.createElement("div");
+    title.classList.add("col-5","border","ps-1");
+    title.setAttribute("data-bs-toggle","collapse");
+    title.setAttribute("data-bs-target",`#${TITLE}`);
+    title.textContent = TITLE;
+    title.style.backgroundColor = PRIORITY;
+
+    const dueDate = document.createElement("div");
+    dueDate.classList.add("col-5","border","ps-1");
+    dueDate.setAttribute("data-bs-toggle","collapse");
+    dueDate.setAttribute("data-bs-target",`#${TITLE}`),
+    dueDate.textContent = DUEDATE;
+    dueDate.style.backgroundColor = PRIORITY;
+
+    const colOption = document.createElement("div");
+    colOption.classList.add("col-1");
+
+    const option = document.createElement("i");
+    option.style.opacity = "0.5";
+    option.classList.add("fa-solid","fa-gear","ps-1");
+
+    const description = document.createElement("div");
+    description.setAttribute("id",TITLE);
+    description.classList.add("border", "collapse");
+    description.textContent = DESCRIPTION;
+    description.style.backgroundColor = PRIORITY;
+
+    const content = document.querySelector(".content");
+    const createP = document.querySelector(".createP");
+
+    row.appendChild(colCheckbox);
+    row.appendChild(title);
+    row.appendChild(dueDate);
+    row.appendChild(colOption);
+    row.appendChild(description);
+
+    colCheckbox.appendChild(checkbox);
+    colOption.appendChild(option);
+
+    content.insertBefore(row, createP)
+}
+
+buildHtml("TITLE", "DESCRIPTION", "DUEDATE", "PRIORITY");
+
+
 
 
 
