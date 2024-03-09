@@ -27,10 +27,10 @@ class ProjectToDo {
       this.project.todo.splice(index, 1);
     }
   }
-  static compareDuedateToToday(date) {
-    const now = new Date();
-    return formatDistance(now, date);
-  }
+  // static compareDuedateToToday(date) {
+  //   const now = new Date();
+  //   return formatDistance(now, date);
+  // }
 }
 
 class Todo {
@@ -52,7 +52,7 @@ class Todo {
     return this.#complete;
   }
   set duedate(date) {
-    this.#duedate = ProjectToDo.compareDuedateToToday(new Date(date));
+    this.#duedate = date;
   }
   get duedate() {
     return this.#duedate;

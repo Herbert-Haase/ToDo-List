@@ -7,28 +7,28 @@ class Input {
   static description = document.querySelector("#description");
   static duedate = document.querySelector("#duedate");
   static priority = document.querySelector("#priority");
-  static error = document.querySelector(".error");
+  // static error = document.querySelector(".error");
 
-  cleanInput() {
+  static cleanInput = () => {
     title.value = "";
     titleTodo.value = "";
     description.value = "";
     duedate.value = "";
     priority.value = "";
-    error.textContent = "";
-  }
+    // error.textContent = "";
+  };
 
-  getInputTodo() {
+  static getInputTodo = () => {
     const titleValue = titleTodo.value;
     const descriptionValue = description.value;
     const duedateValue = duedate.value;
     const priorityValue = priority.value;
 
-    return { titleValue, descriptionValue, duedateValue, priorityValue };
-  }
-  getInputProject() {
+    return { titleValue, descriptionValue, priorityValue, duedateValue };
+  };
+  static getInputProject = () => {
     return title.value;
-  }
+  };
 }
 
 // function showERROR(){
@@ -38,20 +38,10 @@ class Input {
 //     ERROR.textContent = "Duedate can not be in the past";
 // }
 
-class TodoCreator {
-  static saveTodo() {
-    const inputData = Object.values(Input.getInputTodo());
-
-    Input.cleanInput();
-
-    ProjectManager.currentProject.todo = new Todo(...inputData);
-  }
-}
-
 class ProjectManager {
   static #projectList = {};
   static checkForDoubles(input) {
-    return this.#projectList[`${input}`] === undefined;
+    return this.#projectList[`${input}`] !== undefined;
   }
   static createProject = (title) => {
     if (!this.checkForDoubles(title) && title !== undefined) {
@@ -72,18 +62,15 @@ class ProjectManager {
     delete this.#projectList[`${title}`];
   };
 }
+class TodoCreator {
+  static saveTodo() {
+    const inputData = Object.values(Input.getInputTodo());
 
-ProjectManager.createProject("default");
-ProjectManager.currentProject = "default";
+    Input.cleanInput();
 
-const save = document.querySelector(".save");
-save.addEventListener("click", () => {
-  TodoCreator.saveTodo();
-  buildHtmlTodo;
-});
-
-const cancel = document.querySelector(".cancel");
-cancel.addEventListener("click", Input.cleanInput);
+    ProjectManager.currentProject.todo = new Todo(...inputData);
+  }
+}
 
 // const title = document.querySelector("#title");
 // title.addEventListener("blur",validateTitle);
@@ -96,9 +83,15 @@ cancel.addEventListener("click", Input.cleanInput);
 //     document.querySelector(".save").removeAttribute("disabled");
 // }
 
-class buildHtmlProject {}
+// class buildHtmlProject {}
 
-const buildHtmlTodo = (TITLE, DESCRIPTION, DUEDATE, PRIORITY) => {
+const buildHtmlTodo = (TITLE, DESCRIPTION, PRIORITY, DUEDATE) => {
+  const priority = {
+    no: "black",
+    low: "grey",
+    medium: "blue",
+    high: "red",
+  };
   const row = document.createElement("div");
   row.classList.add("row", "g-1", "mb-2");
 
@@ -114,14 +107,13 @@ const buildHtmlTodo = (TITLE, DESCRIPTION, DUEDATE, PRIORITY) => {
   title.setAttribute("data-bs-toggle", "collapse");
   title.setAttribute("data-bs-target", `#${TITLE}`);
   title.textContent = TITLE;
-  title.style.backgroundColor = PRIORITY;
+  title.style.color = priority[PRIORITY];
 
   const dueDate = document.createElement("div");
   dueDate.classList.add("col-5", "border", "ps-1");
   dueDate.setAttribute("data-bs-toggle", "collapse");
   dueDate.setAttribute("data-bs-target", `#${TITLE}`),
     (dueDate.textContent = DUEDATE);
-  dueDate.style.backgroundColor = PRIORITY;
 
   const colOption = document.createElement("div");
   colOption.classList.add("col-1");
@@ -134,13 +126,11 @@ const buildHtmlTodo = (TITLE, DESCRIPTION, DUEDATE, PRIORITY) => {
   description.setAttribute("id", TITLE);
   description.classList.add("border", "collapse");
   description.textContent = DESCRIPTION;
-  description.style.backgroundColor = PRIORITY;
 
   const content = document.querySelector(".content");
-  const createP = document.querySelector(".createP");
+  const createTodo = document.querySelector("#createTodo");
 
   row.appendChild(colCheckbox);
-  console.log(row, colCheckbox);
   row.appendChild(title);
   row.appendChild(dueDate);
   row.appendChild(colOption);
@@ -149,7 +139,21 @@ const buildHtmlTodo = (TITLE, DESCRIPTION, DUEDATE, PRIORITY) => {
   colCheckbox.appendChild(checkbox);
   colOption.appendChild(option);
 
-  content.insertBefore(row, createP);
+  content.insertBefore(row, createTodo);
 };
 
-buildHtmlTodo("TITLE", "DESCRIPTION", "DUEDATE", "red");
+ProjectManager.createProject("default");
+ProjectManager.currentProject = "default";
+
+document.querySelector(".saveTodo").addEventListener("click", () => {
+  TodoCreator.saveTodo();
+  buildHtmlTodo(
+    ProjectManager.currentProject.todo.at(-1).title,
+    ProjectManager.currentProject.todo.at(-1).description,
+    ProjectManager.currentProject.todo.at(-1).priority,
+    ProjectManager.currentProject.todo.at(-1).duedate
+  );
+});
+
+const cancel = document.querySelector(".cancel");
+cancel.addEventListener("click", Input.cleanInput);
