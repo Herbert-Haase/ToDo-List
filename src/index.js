@@ -83,7 +83,16 @@ class TodoCreator {
 //     document.querySelector(".save").removeAttribute("disabled");
 // }
 
-// class buildHtmlProject {}
+function buildHtmlProject(title) {
+  const project = document.createElement("button");
+  project.textContent = title;
+  project.setAttribute("type", "button");
+  project.classList.add("btn", "btn-secondary", "container");
+
+  document
+    .querySelector(".sidebar")
+    .insertBefore(project, document.querySelector("#createProject"));
+}
 
 const buildHtmlTodo = (TITLE, DESCRIPTION, PRIORITY, DUEDATE) => {
   const priority = {
@@ -153,6 +162,13 @@ document.querySelector(".saveTodo").addEventListener("click", () => {
     ProjectManager.currentProject.todo.at(-1).priority,
     ProjectManager.currentProject.todo.at(-1).duedate
   );
+});
+
+document.querySelector(".saveProject").addEventListener("click", () => {
+  ProjectManager.createProject(Input.getInputProject());
+  ProjectManager.currentProject(Input.getInputProject());
+  buildHtmlProject(Input.getInputProject());
+  Input.cleanInput();
 });
 
 const cancel = document.querySelector(".cancel");
