@@ -87,7 +87,8 @@ function buildHtmlProject(title) {
   const project = document.createElement("button");
   project.textContent = title;
   project.setAttribute("type", "button");
-  project.classList.add("btn", "btn-secondary", "container");
+  project.setAttribute("id", `ID${title}`);
+  project.classList.add("btn", "btn-secondary", "container", "project", "mb-1");
 
   document
     .querySelector(".sidebar")
@@ -153,23 +154,52 @@ const buildHtmlTodo = (TITLE, DESCRIPTION, PRIORITY, DUEDATE) => {
 
 ProjectManager.createProject("default");
 ProjectManager.currentProject = "default";
+showHtmlCurrentProject();
 
-document.querySelector(".saveTodo").addEventListener("click", () => {
-  TodoCreator.saveTodo();
-  buildHtmlTodo(
-    ProjectManager.currentProject.todo.at(-1).title,
-    ProjectManager.currentProject.todo.at(-1).description,
-    ProjectManager.currentProject.todo.at(-1).priority,
-    ProjectManager.currentProject.todo.at(-1).duedate
-  );
-});
+const saveTodoButton = document.querySelector(".saveTodo");
 
-document.querySelector(".saveProject").addEventListener("click", () => {
-  ProjectManager.createProject(Input.getInputProject());
-  ProjectManager.currentProject(Input.getInputProject());
-  buildHtmlProject(Input.getInputProject());
-  Input.cleanInput();
-});
+if (!saveTodoButton.hasAttribute("data-listener-added")) {
+  saveTodoButton.addEventListener("click", () => {
+    TodoCreator.saveTodo();
+    buildHtmlTodo(
+      ProjectManager.currentProject.todo.at(-1).title,
+      ProjectManager.currentProject.todo.at(-1).description,
+      ProjectManager.currentProject.todo.at(-1).priority,
+      ProjectManager.currentProject.todo.at(-1).duedate
+    );
+  });
+  saveTodoButton.setAttribute("data-listener-added", "");
+}
 
-const cancel = document.querySelector(".cancel");
-cancel.addEventListener("click", Input.cleanInput);
+const saveProjectButton = document.querySelector(".saveProject");
+
+if (!saveProjectButton.hasAttribute("data-listener-added")) {
+  saveProjectButton.addEventListener("click", () => {
+    ProjectManager.createProject(Input.getInputProject());
+    ProjectManager.currentProject = Input.getInputProject();
+    buildHtmlProject(Input.getInputProject());
+    projectSwitch();
+    Input.cleanInput();
+  });
+  saveProjectButton.setAttribute("data-listener-added", "");
+}
+
+document.querySelector(".cancel").addEventListener("click", Input.cleanInput);
+function projectSwitch() {
+  const projectElements = document.querySelectorAll(".project");
+
+  projectElements.forEach((projectElement) => {
+    if (!projectElement.hasAttribute("data-listener-added")) {
+      projectElement.addEventListener("click", (e) => {
+        ProjectManager.currentProject = e.target.getAttribute("id").slice(2);
+        showHtmlCurrentProject();
+      });
+      projectElement.setAttribute("data-listener-added", "");
+    }
+  });
+}
+
+function showHtmlCurrentProject() {
+  document.querySelector("#currentProject").textContent =
+    ProjectManager.currentProject.title;
+}
