@@ -42,7 +42,6 @@ class Todo {
     this.#complete;
   }
   #complete;
-  #duedate;
   set complete(bool) {
     if (bool && this.project !== undefined) {
       this.removeTodo();
@@ -50,12 +49,6 @@ class Todo {
   }
   get complete() {
     return this.#complete;
-  }
-  set duedate(date) {
-    this.#duedate = date;
-  }
-  get duedate() {
-    return this.#duedate;
   }
 }
 

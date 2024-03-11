@@ -103,7 +103,6 @@ const buildHtmlTodo = (TITLE, DESCRIPTION, PRIORITY, DUEDATE) => {
     medium: "blue",
     high: "red",
   };
-  // let TITLEID = TITLE.split(" ").join("");
   const TITLEID = TITLE.replaceAll(/[^a-zA-Z0-9]/g, "");
   const row = document.createElement("div");
   row.classList.add("row", "g-1", "mb-2", "todo");
@@ -192,6 +191,7 @@ if (!saveProjectButton.hasAttribute("data-listener-added")) {
       buildHtmlProject(Input.getInputProject());
       projectSwitch();
       Input.cleanInput();
+      saveToLocalStorage();
     } else {
       throwErrorHTML("Project have to be unique!");
     }
@@ -244,3 +244,30 @@ function deleteTodoHTML(todo) {
     checkbox.setAttribute("data-listener-added", "");
   });
 }
+
+function saveToLocalStorage() {
+  Object.values(ProjectManager.getProjectList()).map((project) => {
+    localStorage.setItem(`${project.title}`, JSON.stringify(project.todo));
+  });
+}
+
+function loadFromLocalStorage() {
+  Object.values(localStorage).map((todoString) => {
+    const todo = JSON.parse(todoString);
+    ProjectManager.createProject(todo.project.title);
+    const todoObject = new Todo(
+      todo.title,
+      todo.description,
+      todo.priority,
+      todo.duedate
+    );
+    Project.getProjectList()[todo.project.title].todo = todoObject;
+  });
+}
+
+// const obj = [
+//   { name: "John", age: 30, city: "New York" },
+//   { name: "John", age: 30, city: "New York" },
+// ];
+// const myJSON = JSON.stringify(obj);
+// localStorage.setItem("test", myJSON);
