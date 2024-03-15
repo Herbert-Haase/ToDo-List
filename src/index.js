@@ -9,6 +9,7 @@ import {
   showHtmlCurrentProject,
   deleteTodoHTML,
   throwErrorHTML,
+  projectSwitchOnButtonPress,
 } from "./customizeHTML.js";
 
 // initializing projects and todos from localstorage
@@ -80,19 +81,4 @@ if (!saveProjectButton.hasAttribute("data-listener-added")) {
   saveProjectButton.setAttribute("data-listener-added", "");
 }
 
-// Switch Projects on Buttonpress
 document.querySelector(".cancel").addEventListener("click", Input.cleanInput);
-function projectSwitchOnButtonPress() {
-  const projectElements = document.querySelectorAll(".project");
-
-  projectElements.forEach((projectElement) => {
-    if (!projectElement.hasAttribute("data-listener-added")) {
-      projectElement.addEventListener("click", (e) => {
-        ProjectManager.currentProject = e.target.getAttribute("id").slice(2);
-        showHtmlCurrentProject();
-        loadHTMLTodosAfterSwitching();
-      });
-      projectElement.setAttribute("data-listener-added", "");
-    }
-  });
-}

@@ -60,4 +60,5 @@ export {
   showHtmlCurrentProject,
   deleteTodoHTML,
   throwErrorHTML,
+  projectSwitchOnButtonPress,
 };

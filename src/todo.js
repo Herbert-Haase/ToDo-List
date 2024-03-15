@@ -54,8 +54,6 @@ class ProjectManager {
   };
 }
 
-// export { ProjectManager, Project, Todo };
-
 module.exports = {
   ProjectManager,
   Project,
