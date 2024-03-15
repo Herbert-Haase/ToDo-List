@@ -2,6 +2,14 @@ import { ProjectManager, Todo } from "./todo.js";
 import "./style.css";
 import { Input } from "./input.js";
 import { buildHtmlProject, buildHtmlTodo } from "./buildHTML.js";
+import { saveToLocalStorage, loadFromLocalStorage } from "./localStorage.js";
+import {
+  loadHTMLTodosAfterSwitching,
+  loadHTMLProjectsAfterSwitching,
+  showHtmlCurrentProject,
+  deleteTodoHTML,
+  throwErrorHTML,
+} from "./customizeHTML.js";
 
 // initializing projects and todos from localstorage
 // or falling back to default project
@@ -72,10 +80,6 @@ if (!saveProjectButton.hasAttribute("data-listener-added")) {
   saveProjectButton.setAttribute("data-listener-added", "");
 }
 
-function throwErrorHTML(text) {
-  alert(text);
-}
-
 // Switch Projects on Buttonpress
 document.querySelector(".cancel").addEventListener("click", Input.cleanInput);
 function projectSwitchOnButtonPress() {
@@ -87,72 +91,8 @@ function projectSwitchOnButtonPress() {
         ProjectManager.currentProject = e.target.getAttribute("id").slice(2);
         showHtmlCurrentProject();
         loadHTMLTodosAfterSwitching();
-        e.stopPropagation();
       });
       projectElement.setAttribute("data-listener-added", "");
     }
   });
-}
-
-function loadHTMLTodosAfterSwitching() {
-  document.querySelectorAll(".todo").forEach((todoHTML) => todoHTML.remove());
-  ProjectManager.currentProject.todo.map((todo) => {
-    buildHtmlTodo(todo.title, todo.description, todo.priority, todo.duedate);
-    deleteTodoHTML(ProjectManager.currentProject, todo);
-  });
-}
-function loadHTMLProjectsAfterSwitching() {
-  document
-    .querySelectorAll(".project")
-    .forEach((projectHTML) => projectHTML.remove());
-  Object.values(ProjectManager.getProjectList()).map((project) => {
-    buildHtmlProject(project.title);
-    projectSwitchOnButtonPress();
-  });
-}
-
-function showHtmlCurrentProject() {
-  document.querySelector("#currentProject").textContent =
-    ProjectManager.currentProject.title;
-}
-
-function deleteTodoHTML(project, todo) {
-  document.querySelectorAll(".delete").forEach((checkbox) => {
-    if (!checkbox.hasAttribute("data-listener-added")) {
-      checkbox.addEventListener("input", () => {
-        project.removeTodo(todo);
-        loadHTMLTodosAfterSwitching();
-        saveToLocalStorage();
-      });
-    }
-    checkbox.setAttribute("data-listener-added", "");
-  });
-}
-
-function saveToLocalStorage() {
-  Object.values(ProjectManager.getProjectList()).map((project) => {
-    localStorage.removeItem(`${project.title}`);
-    localStorage.setItem(`${project.title}`, JSON.stringify(project.todo));
-    console.log(project.todo);
-  });
-}
-function loadFromLocalStorage() {
-  try {
-    Object.keys(localStorage).forEach((project) => {
-      const todos = JSON.parse(localStorage.getItem(project));
-      ProjectManager.createProject(project);
-      todos.forEach((todo) => {
-        if (!todo.title) return; // Skip if title is undefined
-        const todoObject = new Todo(
-          todo.title,
-          todo.description,
-          todo.priority,
-          todo.duedate
-        );
-        ProjectManager.getProjectList()[project].todo = todoObject;
-      });
-    });
-  } catch (e) {
-    console.error(e, "Error loading projects from local storage");
-  }
 }
