@@ -1,8 +1,9 @@
+import { ProjectManager, Todo } from "./todo";
+
 function saveToLocalStorage() {
   Object.values(ProjectManager.getProjectList()).map((project) => {
     localStorage.removeItem(`${project.title}`);
     localStorage.setItem(`${project.title}`, JSON.stringify(project.todo));
-    console.log(project.todo);
   });
 }
 function loadFromLocalStorage() {

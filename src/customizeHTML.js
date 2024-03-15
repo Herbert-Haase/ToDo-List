@@ -1,3 +1,7 @@
+import { ProjectManager } from "./todo";
+import { buildHtmlProject, buildHtmlTodo } from "./buildHTML";
+import { saveToLocalStorage, loadFromLocalStorage } from "./localStorage";
+
 function loadHTMLTodosAfterSwitching() {
   document.querySelectorAll(".todo").forEach((todoHTML) => todoHTML.remove());
   ProjectManager.currentProject.todo.map((todo) => {
@@ -30,6 +34,20 @@ function deleteTodoHTML(project, todo) {
       });
     }
     checkbox.setAttribute("data-listener-added", "");
+  });
+}
+function projectSwitchOnButtonPress() {
+  const projectElements = document.querySelectorAll(".project");
+
+  projectElements.forEach((projectElement) => {
+    if (!projectElement.hasAttribute("data-listener-added")) {
+      projectElement.addEventListener("click", (e) => {
+        ProjectManager.currentProject = e.target.getAttribute("id").slice(2);
+        showHtmlCurrentProject();
+        loadHTMLTodosAfterSwitching();
+      });
+      projectElement.setAttribute("data-listener-added", "");
+    }
   });
 }
 function throwErrorHTML(text) {
