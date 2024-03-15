@@ -1,177 +1,48 @@
-import { Project, Todo } from "./todo.js";
+import { ProjectManager, Todo } from "./todo.js";
 import "./style.css";
+import { Input } from "./input.js";
+import { buildHtmlProject, buildHtmlTodo } from "./buildHTML.js";
 
-class Input {
-  static title = document.querySelector("#title");
-  static titleTodo = document.querySelector("#titleTodo");
-  static description = document.querySelector("#description");
-  static duedate = document.querySelector("#duedate");
-  static priority = document.querySelector("#priority");
-  // static error = document.querySelector(".error");
-
-  static cleanInput = () => {
-    title.value = "";
-    titleTodo.value = "";
-    description.value = "";
-    duedate.value = "";
-    priority.value = "";
-    // error.textContent = "";
-  };
-
-  static getInputTodo = () => {
-    const titleValue = titleTodo.value;
-    const descriptionValue = description.value;
-    const duedateValue = duedate.value;
-    const priorityValue = priority.value;
-
-    return { titleValue, descriptionValue, priorityValue, duedateValue };
-  };
-  static getInputProject = () => {
-    return title.value;
-  };
-}
-
-// function showERROR(){
-//     const ERROR = document.querySelector(".error");
-
-//     save.createAttribute("disabled");
-//     ERROR.textContent = "Duedate can not be in the past";
-// }
-
-class ProjectManager {
-  static #projectList = {};
-  static checkForDoubles(input) {
-    return this.#projectList[`${input}`] !== undefined;
+// initializing projects and todos from localstorage
+// or falling back to default project
+const body = document.querySelector("body");
+if (!body.hasAttribute("data-listener-added")) {
+  if (localStorage.length > 0) {
+    loadFromLocalStorage();
+    ProjectManager.currentProject = Object.values(
+      ProjectManager.getProjectList()
+    )[0].title;
+  } else {
+    ProjectManager.createProject("default");
+    ProjectManager.currentProject = "default";
   }
-  static createProject = (title) => {
-    if (!this.checkForDoubles(title) && title !== undefined) {
-      this.#projectList[`${title}`] = new Project(title);
-    }
-  };
-  static getProjectList = () => {
-    return this.#projectList;
-  };
-  static #currentProject;
-  static set currentProject(title) {
-    this.#currentProject = this.#projectList[`${title}`];
-  }
-  static get currentProject() {
-    return this.#currentProject;
-  }
-  static deleteProject = (title) => {
-    delete this.#projectList[`${title}`];
-  };
+  showHtmlCurrentProject();
+  projectSwitchOnButtonPress();
+  loadHTMLProjectsAfterSwitching();
+  loadHTMLTodosAfterSwitching();
 }
-class TodoCreator {
-  static saveTodo() {
-    const inputData = Object.values(Input.getInputTodo());
-
-    Input.cleanInput();
-
-    ProjectManager.currentProject.todo = new Todo(...inputData);
-  }
-}
-
-// const title = document.querySelector("#title");
-// title.addEventListener("blur",validateTitle);
-
-// function validateTitle(){
-//     if(TaskCreator.checkForDoubles(this.value)){
-//         input.showERROR();
-//         return;
-//     }
-//     document.querySelector(".save").removeAttribute("disabled");
-// }
-
-function buildHtmlProject(title) {
-  const TITLEID = title.replaceAll(/[^a-zA-Z0-9]/g, "");
-  const project = document.createElement("button");
-  project.textContent = title;
-  project.setAttribute("type", "button");
-  project.setAttribute("id", `ID${TITLEID}`);
-  project.classList.add("btn", "btn-secondary", "container", "project", "mb-1");
-
-  document
-    .querySelector(".sidebar")
-    .insertBefore(project, document.querySelector("#createProject"));
-}
-
-const buildHtmlTodo = (TITLE, DESCRIPTION, PRIORITY, DUEDATE) => {
-  const priority = {
-    no: "black",
-    low: "grey",
-    medium: "blue",
-    high: "red",
-  };
-  const TITLEID = TITLE.replaceAll(/[^a-zA-Z0-9]/g, "");
-  const row = document.createElement("div");
-  row.classList.add("row", "g-1", "mb-2", "todo");
-
-  const colCheckbox = document.createElement("div");
-  colCheckbox.classList.add("col-1", "d-flex", "justify-content-center");
-
-  const checkbox = document.createElement("input");
-  checkbox.setAttribute("type", "checkbox");
-  checkbox.classList.add("delete");
-  checkbox.style.transform = "scale(1.5)";
-
-  const title = document.createElement("div");
-  title.classList.add("col-5", "border", "ps-1");
-  title.setAttribute("data-bs-toggle", "collapse");
-  title.setAttribute("data-bs-target", `#ID${TITLEID}`);
-  title.textContent = TITLE;
-  title.style.color = priority[PRIORITY];
-
-  const dueDate = document.createElement("div");
-  dueDate.classList.add("col-5", "border", "ps-1");
-  dueDate.setAttribute("data-bs-toggle", "collapse");
-  dueDate.setAttribute("data-bs-target", `#ID${TITLEID}`),
-    (dueDate.textContent = DUEDATE);
-
-  const colOption = document.createElement("div");
-  colOption.classList.add("col-1");
-
-  const option = document.createElement("i");
-  option.style.opacity = "0.5";
-  option.classList.add("fa-solid", "fa-gear", "ps-1");
-
-  const description = document.createElement("div");
-  description.setAttribute("id", `ID${TITLEID}`);
-  description.classList.add("border", "collapse");
-  description.textContent = DESCRIPTION;
-
-  const content = document.querySelector(".content");
-  const createTodo = document.querySelector("#createTodo");
-
-  row.appendChild(colCheckbox);
-  row.appendChild(title);
-  row.appendChild(dueDate);
-  row.appendChild(colOption);
-  row.appendChild(description);
-
-  colCheckbox.appendChild(checkbox);
-  colOption.appendChild(option);
-
-  content.insertBefore(row, createTodo);
-};
-
-ProjectManager.createProject("default");
-ProjectManager.currentProject = "default";
-showHtmlCurrentProject();
+body.setAttribute("data-listener-added", "");
 
 const saveTodoButton = document.querySelector(".saveTodo");
 
+// Button for creating new Todos
 if (!saveTodoButton.hasAttribute("data-listener-added")) {
   saveTodoButton.addEventListener("click", () => {
     if (Input.getInputTodo().titleValue !== "") {
-      TodoCreator.saveTodo();
+      const inputData = Object.values(Input.getInputTodo());
+      ProjectManager.currentProject.todo = new Todo(...inputData);
+      Input.cleanInput();
       buildHtmlTodo(
         ProjectManager.currentProject.todo.at(-1).title,
         ProjectManager.currentProject.todo.at(-1).description,
         ProjectManager.currentProject.todo.at(-1).priority,
         ProjectManager.currentProject.todo.at(-1).duedate
       );
-      deleteTodoHTML(ProjectManager.currentProject.todo.at(-1));
+      deleteTodoHTML(
+        ProjectManager.currentProject,
+        ProjectManager.currentProject.todo.at(-1)
+      );
+      saveToLocalStorage();
     } else {
       throwErrorHTML("Todo Name can not be empty");
     }
@@ -179,6 +50,7 @@ if (!saveTodoButton.hasAttribute("data-listener-added")) {
   saveTodoButton.setAttribute("data-listener-added", "");
 }
 
+// Button for creating Projects
 const saveProjectButton = document.querySelector(".saveProject");
 
 if (!saveProjectButton.hasAttribute("data-listener-added")) {
@@ -188,8 +60,9 @@ if (!saveProjectButton.hasAttribute("data-listener-added")) {
     } else if (!ProjectManager.checkForDoubles(Input.getInputProject())) {
       ProjectManager.createProject(Input.getInputProject());
       ProjectManager.currentProject = Input.getInputProject();
+      showHtmlCurrentProject();
       buildHtmlProject(Input.getInputProject());
-      projectSwitch();
+      projectSwitchOnButtonPress();
       Input.cleanInput();
       saveToLocalStorage();
     } else {
@@ -203,16 +76,18 @@ function throwErrorHTML(text) {
   alert(text);
 }
 
+// Switch Projects on Buttonpress
 document.querySelector(".cancel").addEventListener("click", Input.cleanInput);
-function projectSwitch() {
+function projectSwitchOnButtonPress() {
   const projectElements = document.querySelectorAll(".project");
 
   projectElements.forEach((projectElement) => {
     if (!projectElement.hasAttribute("data-listener-added")) {
       projectElement.addEventListener("click", (e) => {
-        ProjectManager.currentProject = e.target.textContent.trim();
+        ProjectManager.currentProject = e.target.getAttribute("id").slice(2);
         showHtmlCurrentProject();
         loadHTMLTodosAfterSwitching();
+        e.stopPropagation();
       });
       projectElement.setAttribute("data-listener-added", "");
     }
@@ -220,10 +95,19 @@ function projectSwitch() {
 }
 
 function loadHTMLTodosAfterSwitching() {
-  document.querySelectorAll(".todo").forEach((todo) => todo.remove());
+  document.querySelectorAll(".todo").forEach((todoHTML) => todoHTML.remove());
   ProjectManager.currentProject.todo.map((todo) => {
     buildHtmlTodo(todo.title, todo.description, todo.priority, todo.duedate);
-    deleteTodoHTML(todo);
+    deleteTodoHTML(ProjectManager.currentProject, todo);
+  });
+}
+function loadHTMLProjectsAfterSwitching() {
+  document
+    .querySelectorAll(".project")
+    .forEach((projectHTML) => projectHTML.remove());
+  Object.values(ProjectManager.getProjectList()).map((project) => {
+    buildHtmlProject(project.title);
+    projectSwitchOnButtonPress();
   });
 }
 
@@ -232,13 +116,13 @@ function showHtmlCurrentProject() {
     ProjectManager.currentProject.title;
 }
 
-function deleteTodoHTML(todo) {
+function deleteTodoHTML(project, todo) {
   document.querySelectorAll(".delete").forEach((checkbox) => {
     if (!checkbox.hasAttribute("data-listener-added")) {
       checkbox.addEventListener("input", () => {
-        console.log(todo);
-        todo.complete = true;
+        project.removeTodo(todo);
         loadHTMLTodosAfterSwitching();
+        saveToLocalStorage();
       });
     }
     checkbox.setAttribute("data-listener-added", "");
@@ -247,27 +131,28 @@ function deleteTodoHTML(todo) {
 
 function saveToLocalStorage() {
   Object.values(ProjectManager.getProjectList()).map((project) => {
+    localStorage.removeItem(`${project.title}`);
     localStorage.setItem(`${project.title}`, JSON.stringify(project.todo));
+    console.log(project.todo);
   });
 }
-
 function loadFromLocalStorage() {
-  Object.values(localStorage).map((todoString) => {
-    const todo = JSON.parse(todoString);
-    ProjectManager.createProject(todo.project.title);
-    const todoObject = new Todo(
-      todo.title,
-      todo.description,
-      todo.priority,
-      todo.duedate
-    );
-    Project.getProjectList()[todo.project.title].todo = todoObject;
-  });
+  try {
+    Object.keys(localStorage).forEach((project) => {
+      const todos = JSON.parse(localStorage.getItem(project));
+      ProjectManager.createProject(project);
+      todos.forEach((todo) => {
+        if (!todo.title) return; // Skip if title is undefined
+        const todoObject = new Todo(
+          todo.title,
+          todo.description,
+          todo.priority,
+          todo.duedate
+        );
+        ProjectManager.getProjectList()[project].todo = todoObject;
+      });
+    });
+  } catch (e) {
+    console.error(e, "Error loading projects from local storage");
+  }
 }
-
-// const obj = [
-//   { name: "John", age: 30, city: "New York" },
-//   { name: "John", age: 30, city: "New York" },
-// ];
-// const myJSON = JSON.stringify(obj);
-// localStorage.setItem("test", myJSON);

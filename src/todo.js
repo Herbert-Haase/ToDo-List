@@ -1,5 +1,11 @@
-import { formatDistance } from "date-fns";
-// const { formatDistance } = require("date-fns");
+class Todo {
+  constructor(title, description, priority, duedate) {
+    this.title = title;
+    this.description = description;
+    this.priority = priority;
+    this.duedate = duedate;
+  }
+}
 
 class Project {
   constructor(title = "default") {
@@ -8,54 +14,50 @@ class Project {
   }
   #todo;
   set todo(item) {
-    item.project = this;
-    item.removeTodo = ProjectToDo.removeTodo.bind(item);
     this.#todo.push(item);
   }
   get todo() {
     return this.#todo;
   }
-}
-
-class ProjectToDo {
-  // static exposeTodo = (todo) => ({ title: todo.title, duedate: todo.duedate });
-  static removeTodo() {
-    let index = this.project.todo.findIndex((item) => {
-      return item === this;
+  removeTodo(todo) {
+    let index = this.todo.findIndex((item) => {
+      return item === todo;
     });
     if (index !== -1) {
-      this.project.todo.splice(index, 1);
+      this.todo.splice(index, 1);
     }
-  }
-  // static compareDuedateToToday(date) {
-  //   const now = new Date();
-  //   return formatDistance(now, date);
-  // }
-}
-
-class Todo {
-  constructor(title, description, priority, duedate) {
-    this.title = title;
-    this.description = description;
-    this.priority = priority;
-    this.duedate = duedate;
-    this.#complete;
-  }
-  #complete;
-  set complete(bool) {
-    if (bool && this.project !== undefined) {
-      this.removeTodo();
-    }
-  }
-  get complete() {
-    return this.#complete;
   }
 }
 
-export { Project, ProjectToDo, Todo };
+class ProjectManager {
+  static #projectList = {};
+  static checkForDoubles(input) {
+    return this.#projectList[input] !== undefined;
+  }
+  static createProject = (title) => {
+    if (!this.checkForDoubles(title) && title !== undefined) {
+      this.#projectList[title] = new Project(title);
+    }
+  };
+  static getProjectList = () => {
+    return this.#projectList;
+  };
+  static #currentProject;
+  static set currentProject(title) {
+    this.#currentProject = this.#projectList[title];
+  }
+  static get currentProject() {
+    return this.#currentProject;
+  }
+  static deleteProject = (title) => {
+    delete this.#projectList[title];
+  };
+}
 
-// module.exports = {
-//   Project,
-//   ProjectToDo,
-//   Todo,
-// };
+// export { ProjectManager, Project, Todo };
+
+module.exports = {
+  ProjectManager,
+  Project,
+  Todo,
+};

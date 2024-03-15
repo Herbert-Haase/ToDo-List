@@ -1,56 +1,77 @@
-const { formatDistance } = require("date-fns");
-const { Project, ProjectToDo, Todo } = require("../src/todo.js");
+// const { formatDistance } = require("date-fns");
 
-describe("Project class", () => {
-  it("should create a project with a default title if none is provided", () => {
-    const project = new Project();
-    expect(project.title).toBe("default");
-  });
-
-  it("should add a todo item to the project", () => {
-    const project = new Project("Test Project");
-    const todo = new Todo("Test Todo", "Test Description", "High", new Date());
-    project.todo = todo;
-    expect(project.todo).toContainEqual(todo);
-  });
-
-  // Add more tests for Project class functionality
-});
-
-// describe("ProjectToDo class", () => {
-//   it("should expose todo properties correctly", () => {
-//     const todo = new Todo("Test Todo", "Test Description", "High", new Date());
-//     const exposedTodo = ProjectToDo.exposeTodo(todo);
-//     expect(exposedTodo).toEqual({
-//       title: "Test Todo",
-//       duedate: expect.any(String),
-//     });
-//   });
-
-it("should compare a todo's due date to today's date", () => {
-  const date = new Date();
-  const distance = ProjectToDo.compareDuedateToToday(date);
-  expect(distance).toBe(formatDistance(new Date(), date));
-});
-
-// Add more tests for ProjectToDo class functionality
+const { ProjectManager, Project, Todo } = require("../src/todo.js");
 
 describe("Todo class", () => {
-  it("should set and get the complete status of a todo", () => {
-    const project = new Project("Test Project");
-    const todo = new Todo("Test Todo", "Test Description", "High", new Date());
-    project.todo = todo;
-    todo.complete = true;
-    expect(project.todo.length).toBe(0);
-  });
-
-  it("should set and get the due date of a todo", () => {
-    const todo = new Todo("Test Todo", "Test Description", "High", new Date());
-    todo.duedate = "2023-04-01";
-    expect(todo.duedate).toBe(
-      ProjectToDo.compareDuedateToToday(new Date("2023-04-01"))
+  it("should create a new Todo instance with the given parameters", () => {
+    const todo = new Todo(
+      "Test Todo",
+      "This is a test todo",
+      "High",
+      "2023-12-31"
     );
+    expect(todo.title).toBe("Test Todo");
+    expect(todo.description).toBe("This is a test todo");
+    expect(todo.priority).toBe("High");
+    expect(todo.duedate).toBe("2023-12-31");
+  });
+});
+
+describe("Project class", () => {
+  it("should create a new Project instance with the given title", () => {
+    const project = new Project("Test Project");
+    expect(project.title).toBe("Test Project");
+    expect(project.todo).toEqual([]);
   });
 
-  // Add more tests for Todo class functionality
+  it("should add a todo to the project", () => {
+    const project = new Project("Test Project");
+    const todo = new Todo(
+      "Test Todo",
+      "This is a test todo",
+      "High",
+      "2023-12-31"
+    );
+    project.todo = todo;
+    expect(project.todo).toContain(todo);
+  });
+
+  it("should remove a todo from the project", () => {
+    const project = new Project("Test Project");
+    const todo = new Todo(
+      "Test Todo",
+      "This is a test todo",
+      "High",
+      "2023-12-31"
+    );
+    project.todo = todo;
+    project.removeTodo(todo);
+    expect(project.todo).not.toContain(todo);
+  });
+});
+
+describe("ProjectManager class", () => {
+  it("should create a new project and add it to the project list", () => {
+    ProjectManager.createProject("Test Project");
+    expect(ProjectManager.getProjectList()).toHaveProperty("Test Project");
+  });
+
+  it("should not create a project if the title already exists", () => {
+    ProjectManager.createProject("Test Project");
+    ProjectManager.createProject("Test Project");
+    expect(Object.keys(ProjectManager.getProjectList()).length).toBe(1);
+  });
+
+  it("should set the current project", () => {
+    ProjectManager.createProject("Test Project");
+    ProjectManager.currentProject = "Test Project";
+    expect(ProjectManager.currentProject).toBeDefined();
+    expect(ProjectManager.currentProject.title).toBe("Test Project");
+  });
+
+  it("should delete a project from the project list", () => {
+    ProjectManager.createProject("Test Project");
+    ProjectManager.deleteProject("Test Project");
+    expect(ProjectManager.getProjectList()).not.toHaveProperty("Test Project");
+  });
 });
